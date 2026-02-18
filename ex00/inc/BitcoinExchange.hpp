@@ -7,7 +7,7 @@
 #define BLUE    "\033[34m"
 #define MAGENTA "\033[35m"
 #define CYAN    "\033[36m"
-#define WHITE   "\033[37m"
+#define RESET   "\033[37m"
 
 #include <iostream>
 #include <iomanip>
@@ -19,3 +19,4 @@
 #include <exception>
 #include <vector>
 
+void bitcoinExchange(std::string fileName);
