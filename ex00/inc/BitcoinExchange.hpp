@@ -19,6 +19,7 @@
 #include <exception>
 #include <vector>
 #include <map>
+#include <tuple>
 
 class btc
 {
@@ -28,11 +29,11 @@ class btc
         btc(const btc &other);
         btc& operator=(const btc &other);
 
-        void addData(std::string date, float value);
+        void addData(int year, int month, int day, float value);
         void printAllData();
 
     private:
-        std::map<std::string, float> data;
+        std::map<std::tuple<int, int, int>, float> data;
 };
 
 void bitcoinExchange(std::string fileName);
