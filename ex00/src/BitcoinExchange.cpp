@@ -30,7 +30,7 @@ void btc::printAllData()
 {
     for (auto it = this->data.begin(); it != this->data.end(); ++it)
     {
-        std::cout << it->first << " " << it->second << std::endl;
+        std::cout << it->first << " " << std::fixed << std::setprecision(2) << it->second << std::endl;
     }
 }
 
@@ -45,7 +45,10 @@ void parseData(btc &bitcoinData, std::string line)
 
     // std::cout << year << "-" << month << "-" << day << std::endl;
     std::string date = std::string(line.begin(), iter1);
-    bitcoinData.addData(date, 0);
+
+    std::string value = std::string(iter1 + 1, line.end());
+
+    bitcoinData.addData(date, std::strtof(value.c_str(), NULL));
 }
 
 void bitcoinExchange(std::string fileName)
@@ -58,7 +61,6 @@ void bitcoinExchange(std::string fileName)
     }
 
     btc bitcoinData;
-
     std::string line;
     std::getline(inputfile, line);
     while(std::getline(inputfile, line))
@@ -66,5 +68,6 @@ void bitcoinExchange(std::string fileName)
         parseData(bitcoinData, line);
     }
     bitcoinData.printAllData();
+
     inputfile.close();
 }
