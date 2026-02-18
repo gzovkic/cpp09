@@ -1,6 +1,27 @@
 #include "BitcoinExchange.hpp"
 
-std::string parseDate(std::string line)
+btc::btc()
+{
+}
+
+btc::~btc()
+{
+}
+
+btc::btc(const btc &other)
+{
+    this->data = other.data;
+}
+
+btc& btc::operator=(const btc &other)
+{
+    if(this == &other)
+        return(*this);
+    this->data = other.data;
+    return(*this);
+}
+
+void parseData(btc &bitcoinData, std::string line)
 {
     std::string::iterator iter1 = std::find(line.begin(), line.end(), '-');
     std::string year = std::string(line.begin(), iter1);
@@ -9,8 +30,9 @@ std::string parseDate(std::string line)
     iter1 = std::find(iter2 + 1, line.end(), ',');
     std::string day = std::string(iter2 + 1, iter1);
 
-    std::cout << year << "-" << month << "-" << day << std::endl;
-    return (year);
+    // std::cout << year << "-" << month << "-" << day << std::endl;
+    std::string date = std::string(line.begin(), iter2);
+
 }
 
 void bitcoinExchange(std::string fileName)
@@ -22,16 +44,13 @@ void bitcoinExchange(std::string fileName)
         return ;
     }
 
-    std::string line;
+    btc bitcoinData;
 
+    std::string line;
     std::getline(inputfile, line);
     while(std::getline(inputfile, line))
     {
-        std::string date;
-        // float value;
-
-        date = parseDate(line);
-        // value = parseValue(line);
+        parseData(bitcoinData, line);
     }
 
     inputfile.close();

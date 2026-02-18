@@ -27,7 +27,7 @@ class btc
         ~btc();
         btc(const btc &other);
         btc& operator=(const btc &other);
-
+        void addData(std::string date, int value);
 
     private:
         std::map<std::string, float> data;
