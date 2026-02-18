@@ -2,8 +2,15 @@
 
 std::string parseDate(std::string line)
 {
-    (void)line;
-    return (NULL);
+    std::string::iterator iter1 = std::find(line.begin(), line.end(), '-');
+    std::string year = std::string(line.begin(), iter1);
+    std::string::iterator iter2 = std::find(iter1 + 1, line.end(), '-');
+    std::string month = std::string(iter1 + 1, iter2);
+    iter1 = std::find(iter2 + 1, line.end(), ',');
+    std::string day = std::string(iter2 + 1, iter1);
+
+    std::cout << year << "-" << month << "-" << day << std::endl;
+    return (year);
 }
 
 void bitcoinExchange(std::string fileName)
@@ -21,10 +28,11 @@ void bitcoinExchange(std::string fileName)
     while(std::getline(inputfile, line))
     {
         std::string date;
-        // std::string value;
+        // float value;
 
-        std::cout << line << std::endl;
         date = parseDate(line);
         // value = parseValue(line);
     }
+
+    inputfile.close();
 }

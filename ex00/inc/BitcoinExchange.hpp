@@ -18,5 +18,19 @@
 #include <iterator>
 #include <exception>
 #include <vector>
+#include <map>
+
+class btc
+{
+    public:
+        btc();
+        ~btc();
+        btc(const btc &other);
+        btc& operator=(const btc &other);
+
+
+    private:
+        std::map<std::string, float> data;
+};
 
 void bitcoinExchange(std::string fileName);
