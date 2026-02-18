@@ -21,6 +21,19 @@ btc& btc::operator=(const btc &other)
     return(*this);
 }
 
+void btc::addData(std::string date, float value)
+{
+    this->data[date] = value;
+}
+
+void btc::printAllData()
+{
+    for (auto it = this->data.begin(); it != this->data.end(); ++it)
+    {
+        std::cout << it->first << " " << it->second << std::endl;
+    }
+}
+
 void parseData(btc &bitcoinData, std::string line)
 {
     std::string::iterator iter1 = std::find(line.begin(), line.end(), '-');
@@ -31,8 +44,8 @@ void parseData(btc &bitcoinData, std::string line)
     std::string day = std::string(iter2 + 1, iter1);
 
     // std::cout << year << "-" << month << "-" << day << std::endl;
-    std::string date = std::string(line.begin(), iter2);
-
+    std::string date = std::string(line.begin(), iter1);
+    bitcoinData.addData(date, 0);
 }
 
 void bitcoinExchange(std::string fileName)
@@ -52,6 +65,6 @@ void bitcoinExchange(std::string fileName)
     {
         parseData(bitcoinData, line);
     }
-
+    bitcoinData.printAllData();
     inputfile.close();
 }
