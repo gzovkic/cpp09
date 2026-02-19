@@ -23,11 +23,13 @@ btc& btc::operator=(const btc &other)
 
 void btc::addData( std::tuple<int, int, int> date,  float value)
 {
-    this->data[date] = value;
+    this->data.insert(std::make_pair(date, value));
 }
 
 void btc::printAllData()
 {
+    std::cout << GREEN << "Printing All Data" << RESET << std::endl;
+
     for (auto it = this->data.begin(); it != this->data.end(); ++it)
     {
         int year = std::get<0>(it->first);
@@ -49,7 +51,10 @@ void parseData(btc &bitcoinData, std::string line)
     int result = sscanf(line.c_str(), "%d-%d-%d,%f", &year, &month, &day, &value);
 
     if (result != 4)
+    {
         std::cout << "Error: invalid format in data.csv!\n";
+        return ;
+    }
     std::tuple<int, int, int> date = std::make_tuple(year, month, day);
     bitcoinData.addData(date, value);
 }
@@ -61,7 +66,25 @@ void    parseInput(btc &inputData, std::string line)
     int result = sscanf(line.c_str(), "%d-%d-%d | %f", &year, &month, &day, &value);
 
     if (result != 4)
-        std::cout << "Error: invalid format in input.txt!\n";
+    {
+        std::cerr << RED << "Error: invalid format in input.txt!" << RESET << std::endl;
+        return ;
+    }
+    if(year < 2009 || year > 2022)
+    {
+        std::cerr << RED << "Error: invalid Year" << RESET << std::endl;
+        return ;
+    }
+    if(month > 12 || month < 1)
+    {
+        std::cerr << RED << "Error: invalid Month" << RESET << std::endl;
+        return ;
+    }
+    if(day > 31 || day < 1)
+    {
+        std::cerr << RED << "Error: invalid day" << RESET << std::endl;
+        return ;
+    }
     std::tuple<int, int, int> date = std::make_tuple(year, month, day);
     inputData.addData(date, value);
 }
@@ -96,4 +119,5 @@ void bitcoinExchange(std::string fileName)
     inputData.printAllData();
 
     inputfile.close();
+    dataFile.close();
 }

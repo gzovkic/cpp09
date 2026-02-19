@@ -34,7 +34,7 @@ class btc
         void printAllData();
 
     private:
-        std::map<std::tuple<int, int, int>, float> data;
+        std::multimap<std::tuple<int, int, int>, float> data;
 };
 
 void bitcoinExchange(std::string fileName);
