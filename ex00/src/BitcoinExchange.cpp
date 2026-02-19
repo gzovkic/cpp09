@@ -59,6 +59,21 @@ void parseData(btc &bitcoinData, std::string line)
     bitcoinData.addData(date, value);
 }
 
+bool isValidDate(int year, int month, int day)
+{
+    struct tm t = {};
+    t.tm_year = year - 1900;
+    t.tm_mon = month - 1;
+    t.tm_mday = day;
+
+    struct tm original = t;
+    mktime(&t);
+
+    return (t.tm_year == original.tm_year &&
+            t.tm_mon  == original.tm_mon  &&
+            t.tm_mday == original.tm_mday);
+}
+
 void    parseInput(btc &inputData, std::string line)
 {
     float value;
@@ -70,19 +85,9 @@ void    parseInput(btc &inputData, std::string line)
         std::cerr << RED << "Error: invalid format in input.txt!" << RESET << std::endl;
         return ;
     }
-    if(year < 2009 || year > 2022)
+    if(!isValidDate(year, month, day))
     {
-        std::cerr << RED << "Error: invalid Year" << RESET << std::endl;
-        return ;
-    }
-    if(month > 12 || month < 1)
-    {
-        std::cerr << RED << "Error: invalid Month" << RESET << std::endl;
-        return ;
-    }
-    if(day > 31 || day < 1)
-    {
-        std::cerr << RED << "Error: invalid day" << RESET << std::endl;
+        std::cerr << RED << "Error: bad input => " << line << RESET << std::endl;
         return ;
     }
     std::tuple<int, int, int> date = std::make_tuple(year, month, day);
