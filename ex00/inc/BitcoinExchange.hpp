@@ -34,9 +34,10 @@ class btc
 
         void addData( std::tuple<int, int, int> surdate, float value);
         void printAllData();
+        float getbtcprice(std::tuple<int, int, int> date);
+        
         std::map<std::tuple<int, int, int>, float> data;
 
-    private:
 };
 
 void bitcoinExchange(std::string fileName);

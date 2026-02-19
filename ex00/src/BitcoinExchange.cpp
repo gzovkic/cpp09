@@ -91,9 +91,22 @@ btc getDatabase(void)
     return(bitcoinData);
 }
 
+float btc::getbtcprice(std::tuple<int, int, int> date)
+{
+    auto it = this->data.lower_bound(date);
+
+    if(it != this->data.end() && it->first == date)
+        return (it->second);
+
+	if(it == this->data.begin())
+		return (-1);
+	--it;
+	return (it->second);
+}
+
 void    parseInput(btc &bitcoinData, std::string line)
 {
-    std::regex pattern("^(\\d{4})-(\\d{2})-(\\d{2}) \\| ([\\d.]+)$");
+    std::regex pattern("^(\\d{4})-(\\d{2})-(\\d{2}) \\| (-?[\\d.]+)$");
     std::smatch matches;
 
     if(!std::regex_match(line, matches, pattern))
@@ -111,7 +124,7 @@ void    parseInput(btc &bitcoinData, std::string line)
 
     if(!isValidDate(date))
     {
-        std::cerr << RED << "Error: bat input => " << line << RESET << std::endl;
+        std::cerr << RED << "Error: bad input => " << line << RESET << std::endl;
         return ;
     }
     if(value < 0)
@@ -125,13 +138,23 @@ void    parseInput(btc &bitcoinData, std::string line)
         return ;
     }
 
-    bitcoinData.data.find(date);
+    float btcPrice = bitcoinData.getbtcprice(date);
+	if (btcPrice < 0)
+	{
+    	std::cerr << RED << "Error: no data for this date." << RESET << std::endl;
+    	return;
+	}
+	std::cout << std::get<0>(date) << "-"
+       		  << std::setw(2) << std::setfill('0') << std::get<1>(date) << "-"
+    	      << std::setw(2) << std::setfill('0') << std::get<2>(date)
+        	  << " => " << std::defaultfloat << value << " = "
+          	  << std::fixed << std::setprecision(2) << (value * btcPrice) << std::endl;
 }
 
 void bitcoinExchange(std::string fileName)
 {
     btc bitcoinData = getDatabase();
-    bitcoinData.printAllData();
+    // bitcoinData.printAllData();
     
     std::ifstream inputfile(fileName);
     if(!inputfile.is_open())
