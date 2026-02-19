@@ -21,6 +21,7 @@
 #include <map>
 #include <tuple>
 
+
 class btc
 {
     public:
@@ -29,7 +30,7 @@ class btc
         btc(const btc &other);
         btc& operator=(const btc &other);
 
-        void addData(int year, int month, int day, float value);
+        void addData( std::tuple<int, int, int> date, float value);
         void printAllData();
 
     private:

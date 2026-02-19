@@ -21,9 +21,9 @@ btc& btc::operator=(const btc &other)
     return(*this);
 }
 
-void btc::addData(int year, int month, int day, float value)
+void btc::addData( std::tuple<int, int, int> date,  float value)
 {
-    this->data[std::make_tuple(year, month, day)] = value;
+    this->data[date] = value;
 }
 
 void btc::printAllData()
@@ -34,52 +34,66 @@ void btc::printAllData()
         int month = std::get<1>(it->first);
         int day = std::get<2>(it->first);
 
-        std::cout << year << "-" << month << "-" << day << " | " <<
-            std::fixed << std::setprecision(2) << it->second << std::endl;
+        std::cout << year << "-"
+                  << std::setw(2) << std::setfill('0') << month << "-"
+                  << std::setw(2) << std::setfill('0') << day
+                  << " | "
+                  << std::fixed << std::setprecision(2) << it->second << std::endl;
     }
 }
 
 void parseData(btc &bitcoinData, std::string line)
 {
-    std::string::iterator iter1 = std::find(line.begin(), line.end(), '-');
-    std::string year = std::string(line.begin(), iter1);
-    std::string::iterator iter2 = std::find(iter1 + 1, line.end(), '-');
-    std::string month = std::string(iter1 + 1, iter2);
-    iter1 = std::find(iter2 + 1, line.end(), ',');
-    std::string day = std::string(iter2 + 1, iter1);
+    float value;
+    int year, month, day;
+    int result = sscanf(line.c_str(), "%d-%d-%d,%f", &year, &month, &day, &value);
 
-    std::string value = std::string(iter1 + 1, line.end());
+    if (result != 4)
+        std::cout << "Error: invalid format in data.csv!\n";
+    std::tuple<int, int, int> date = std::make_tuple(year, month, day);
+    bitcoinData.addData(date, value);
+}
 
-    bitcoinData.addData(std::atoi(year.c_str()),std::atoi(month.c_str()), std::atoi(day.c_str()), std::strtof(value.c_str(), NULL));
+void    parseInput(btc &inputData, std::string line)
+{
+    float value;
+    int year, month, day;
+    int result = sscanf(line.c_str(), "%d-%d-%d | %f", &year, &month, &day, &value);
+
+    if (result != 4)
+        std::cout << "Error: invalid format in input.txt!\n";
+    std::tuple<int, int, int> date = std::make_tuple(year, month, day);
+    inputData.addData(date, value);
 }
 
 void bitcoinExchange(std::string fileName)
 {
-    std::ifstream inputfile("data.csv");
-    if(!inputfile.is_open())
+    std::ifstream dataFile("data.csv");
+    if(!dataFile.is_open())
     {
-        std::cerr << RED << "Error: could not open the file!" << RESET << std::endl;
+        std::cerr << RED << "Error: could not open data.csv file!" << RESET << std::endl;
         return ;
     }
 
     btc bitcoinData;
     std::string line;
-    std::getline(inputfile, line);
-    while(std::getline(inputfile, line))
+    std::getline(dataFile, line);
+    while(std::getline(dataFile, line))
         parseData(bitcoinData, line);
     bitcoinData.printAllData();
 
-    (void)fileName;
-    // std::ifstream inputfile(fileName);
-    // if(!inputfile.is_open())
-    // {
-    //     std::cerr << RED << "Error: could not open the file!" << RESET << std::endl;
-    //     return ;
-    // }
-    // btc inputData;
-    // std::string line;
-    // while(std::getline(inputfile, line))
-
+    std::ifstream inputfile(fileName);
+    if(!inputfile.is_open())
+    {
+        std::cerr << RED << "Error: could not open the file!" << RESET << std::endl;
+        return ;
+    }
+    btc inputData;
+    std::string inputline;
+    std::getline(inputfile, inputline);
+    while(std::getline(inputfile, inputline))
+        parseInput(inputData, inputline);
+    inputData.printAllData();
 
     inputfile.close();
 }
