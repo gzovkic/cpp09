@@ -21,6 +21,7 @@
 #include <map>
 #include <tuple>
 #include <ctime>
+#include <regex>
 
 
 class btc
@@ -31,11 +32,11 @@ class btc
         btc(const btc &other);
         btc& operator=(const btc &other);
 
-        void addData( std::tuple<int, int, int> date, float value);
+        void addData( std::tuple<int, int, int> surdate, float value);
         void printAllData();
+        std::map<std::tuple<int, int, int>, float> data;
 
     private:
-        std::multimap<std::tuple<int, int, int>, float> data;
 };
 
 void bitcoinExchange(std::string fileName);

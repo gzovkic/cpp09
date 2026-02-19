@@ -23,7 +23,7 @@ btc& btc::operator=(const btc &other)
 
 void btc::addData( std::tuple<int, int, int> date,  float value)
 {
-    this->data.insert(std::make_pair(date, value));
+    this->data[date] = value;
 }
 
 void btc::printAllData()
@@ -59,12 +59,12 @@ void parseData(btc &bitcoinData, std::string line)
     bitcoinData.addData(date, value);
 }
 
-bool isValidDate(int year, int month, int day)
+bool isValidDate(std::tuple<int, int, int> date)
 {
     struct tm t = {};
-    t.tm_year = year - 1900;
-    t.tm_mon = month - 1;
-    t.tm_mday = day;
+    t.tm_year = std::get<0>(date) - 1900;
+    t.tm_mon = std::get<1>(date) - 1;
+    t.tm_mday = std::get<2>(date);
 
     struct tm original = t;
     mktime(&t);
@@ -74,55 +74,75 @@ bool isValidDate(int year, int month, int day)
             t.tm_mday == original.tm_mday);
 }
 
-void    parseInput(btc &inputData, std::string line)
+btc getDatabase(void)
 {
-    float value;
-    int year, month, day;
-    int result = sscanf(line.c_str(), "%d-%d-%d | %f", &year, &month, &day, &value);
-
-    if (result != 4)
-    {
-        std::cerr << RED << "Error: invalid format in input.txt!" << RESET << std::endl;
-        return ;
-    }
-    if(!isValidDate(year, month, day))
-    {
-        std::cerr << RED << "Error: bad input => " << line << RESET << std::endl;
-        return ;
-    }
-    std::tuple<int, int, int> date = std::make_tuple(year, month, day);
-    inputData.addData(date, value);
-}
-
-void bitcoinExchange(std::string fileName)
-{
+    btc bitcoinData;
     std::ifstream dataFile("data.csv");
     if(!dataFile.is_open())
     {
         std::cerr << RED << "Error: could not open data.csv file!" << RESET << std::endl;
-        return ;
+        return (btc());
     }
-
-    btc bitcoinData;
     std::string line;
     std::getline(dataFile, line);
     while(std::getline(dataFile, line))
         parseData(bitcoinData, line);
-    bitcoinData.printAllData();
+    dataFile.close();
+    return(bitcoinData);
+}
 
+void    parseInput(btc &bitcoinData, std::string line)
+{
+    std::regex pattern("^(\\d{4})-(\\d{2})-(\\d{2}) \\| ([\\d.]+)$");
+    std::smatch matches;
+
+    if(!std::regex_match(line, matches, pattern))
+    {
+        std::cerr << RED << "Error: bat input => " << line << RESET << std::endl;
+        return ;
+    }
+
+    int year = std::stoi(matches[1]);
+    int month = std::stoi(matches[2]);
+    int day = std::stoi(matches[3]);
+    float value = std::stof(matches[4]);
+
+    std::tuple<int, int, int> date = std::make_tuple(year, month, day);
+
+    if(!isValidDate(date))
+    {
+        std::cerr << RED << "Error: bat input => " << line << RESET << std::endl;
+        return ;
+    }
+    if(value < 0)
+    {
+        std::cerr << RED << "Error: not a positive number." << RESET << std::endl;
+        return ;
+    }
+    if(value > 1000)
+    {
+        std::cerr << RED << "Error: too large a number." << RESET << std::endl;
+        return ;
+    }
+
+    bitcoinData.data.find(date);
+}
+
+void bitcoinExchange(std::string fileName)
+{
+    btc bitcoinData = getDatabase();
+    bitcoinData.printAllData();
+    
     std::ifstream inputfile(fileName);
     if(!inputfile.is_open())
     {
-        std::cerr << RED << "Error: could not open the file!" << RESET << std::endl;
+        std::cerr << RED << "Error: could not open " << fileName << "!" << RESET << std::endl;
         return ;
     }
-    btc inputData;
     std::string inputline;
     std::getline(inputfile, inputline);
     while(std::getline(inputfile, inputline))
-        parseInput(inputData, inputline);
-    inputData.printAllData();
-
+        parseInput(bitcoinData, inputline);
+    
     inputfile.close();
-    dataFile.close();
 }
