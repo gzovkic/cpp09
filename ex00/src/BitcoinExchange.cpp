@@ -111,7 +111,7 @@ void    parseInput(btc &bitcoinData, std::string line)
 
     if(!std::regex_match(line, matches, pattern))
     {
-        std::cerr << RED << "Error: bat input => " << line << RESET << std::endl;
+        std::cerr << RED << "Error: bad input => " << line << RESET << std::endl;
         return ;
     }
 
