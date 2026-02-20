@@ -1,4 +1,4 @@
-NAME = RPM
+NAME = RPN
 CPP = c++
 RM = rm -rf
 

@@ -22,22 +22,6 @@
 #include <tuple>
 #include <ctime>
 #include <regex>
+#include <stack>
 
-
-class btc
-{
-    public:
-        btc();
-        ~btc();
-        btc(const btc &other);
-        btc& operator=(const btc &other);
-
-        void addData( std::tuple<int, int, int> surdate, float value);
-        void printAllData();
-        float getbtcprice(std::tuple<int, int, int> date);
-        
-        std::map<std::tuple<int, int, int>, float> data;
-
-};
-
-void bitcoinExchange(std::string fileName);
+void RPN(char *str);
