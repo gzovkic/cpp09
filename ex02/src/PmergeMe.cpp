@@ -46,6 +46,12 @@ std::vector<size_t> jacobsthalOrder(size_t n)
     return order;
 }
 
+void printPairs(std::vector<std::pair<int,int>> &pairs)
+{
+    for (size_t i = 0; i < pairs.size(); i++)
+        std::cout << "{" << pairs[i].first << "," << pairs[i].second << "} ";
+    std::cout << std::endl;
+}
 
 void fordJohnson(std::vector<int> &arr)
 {
@@ -53,20 +59,14 @@ void fordJohnson(std::vector<int> &arr)
         return;
 
     bool hasStraggler = false;
-
     if(arr.size() % 2 != 0)
         hasStraggler = true;
-    
-    // int straggler = -1;
-    // if(hasStraggler)
-    //     straggler = arr.back();
 
     std::vector<std::pair<int, int>> pairs;
     size_t limit = arr.size();
     if (hasStraggler)
         limit = arr.size() - 1;
 
-    // look which on is bigger and then switch if needed else copy the order.
     for (size_t i = 0; i + 1 < limit; i += 2)
     {
         if (arr[i] >= arr[i + 1])
@@ -75,21 +75,30 @@ void fordJohnson(std::vector<int> &arr)
             pairs.push_back({arr[i + 1], arr[i]});
     }
 
-    // create vector for recursion with the big numbers.
+    std::cout << "--- going down ---" << std::endl;
+    std::cout << "arr:   "; printVector(arr);
+    std::cout << "pairs: "; printPairs(pairs);
+
     std::vector<int> bigs;
     for (const std::pair<int, int> &p : pairs)
         bigs.push_back(p.first);
-    printVector(bigs);
+    std::cout << "bigs:  "; printVector(bigs);
+
     fordJohnson(bigs);
+
+    std::cout << "--- coming back up ---" << std::endl;
+    std::cout << "bigs sorted: "; printVector(bigs);
 
     std::sort(pairs.begin(), pairs.end(), [](const std::pair<int,int> &a, const std::pair<int,int> &b){
         return a.first < b.first;
     });
+    std::cout << "pairs realigned: "; printPairs(pairs);
 
     std::vector<int> chain;
     chain.push_back(pairs[0].second);
     for (const std::pair<int, int> &p : pairs)
         chain.push_back(p.first);
+    std::cout << "chain start: "; printVector(chain);
 
     std::vector<size_t> order = jacobsthalOrder(pairs.size());
     for (size_t idx : order)
@@ -99,9 +108,12 @@ void fordJohnson(std::vector<int> &arr)
         auto boundPos = std::find(chain.begin(), chain.end(), boundVal);
         auto pos      = std::lower_bound(chain.begin(), boundPos, toInsert);
         chain.insert(pos, toInsert);
+        std::cout << "inserted " << toInsert << " (bound=" << boundVal << ") -> chain: "; printVector(chain);
     }
 
     arr = chain;
+    std::cout << "arr = chain: "; printVector(arr);
+    std::cout << std::endl;
 }
 
 void PmergeMe(char *argv[])
