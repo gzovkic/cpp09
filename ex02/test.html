@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ford-Johnson Visualizer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@300;500;700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0a0a0f;
+    color: #e0e0e0;
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    padding: 32px 16px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #555;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+
+  .controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+
+  input[type=text] {
+    background: #13131a;
+    border: 1px solid #2a2a3a;
+    color: #e0e0e0;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    width: 260px;
+    outline: none;
+    transition: border 0.2s;
+  }
+  input[type=text]:focus { border-color: #4f6ef7; }
+
+  button {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-run  { background: #4f6ef7; color: #fff; }
+  .btn-run:hover  { background: #6b85ff; }
+  .btn-prev { background: #1e1e2e; color: #aaa; border: 1px solid #2a2a3a; }
+  .btn-prev:hover { background: #252535; color: #fff; }
+  .btn-next { background: #1e1e2e; color: #aaa; border: 1px solid #2a2a3a; }
+  .btn-next:hover { background: #252535; color: #fff; }
+  button:disabled { opacity: 0.3; cursor: default; }
+
+  .step-counter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: #555;
+    min-width: 80px;
+    text-align: center;
+  }
+
+  .stage {
+    max-width: 820px;
+    margin: 0 auto 18px auto;
+    background: #13131a;
+    border: 1px solid #1e1e2e;
+    border-radius: 10px;
+    padding: 20px 24px;
+    transition: opacity 0.3s;
+  }
+
+  .stage-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #4f6ef7;
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+
+  .desc {
+    font-size: 0.88rem;
+    color: #bbb;
+    line-height: 1.6;
+    margin-bottom: 14px;
+  }
+  .desc strong { color: #fff; }
+
+  .arr-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    margin-top: 8px;
+  }
+
+  .arr-label {
+    font-size: 0.7rem;
+    color: #555;
+    font-family: 'JetBrains Mono', monospace;
+    min-width: 90px;
+  }
+
+  .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    transition: all 0.3s;
+  }
+
+  .num-default  { background: #1e1e2e; color: #ccc; border: 1px solid #2a2a3a; }
+  .num-a        { background: #1a2a4a; color: #6ab0ff; border: 1px solid #2a4a7a; }
+  .num-b        { background: #2a1a3a; color: #c07aff; border: 1px solid #4a2a6a; }
+  .num-strag    { background: #3a2a1a; color: #ffb060; border: 1px solid #6a4a2a; }
+  .num-chain    { background: #1a3a2a; color: #60ffa0; border: 1px solid #2a6a4a; }
+  .num-inserted { background: #3a3a1a; color: #ffe060; border: 1px solid #6a6a2a; }
+
+  .pair-group {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    margin-right: 10px;
+  }
+  .pair-bracket {
+    font-size: 0.6rem;
+    color: #333;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .pair-nums { display: flex; gap: 3px; }
+
+  .legend {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    justify-content: center;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    color: #888;
+  }
+  .legend-dot {
+    width: 12px; height: 12px;
+    border-radius: 3px;
+  }
+
+  .divider {
+    height: 1px;
+    background: #1e1e2e;
+    max-width: 820px;
+    margin: 0 auto 18px auto;
+  }
+
+  .recursion-depth {
+    font-size: 0.65rem;
+    color: #333;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 4px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Ford-Johnson Sort</h1>
+<div class="subtitle">Step-by-step visualizer</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#6ab0ff;border:1px solid #2a4a7a"></div> A number (larger)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#c07aff;border:1px solid #4a2a6a"></div> B number (smaller)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ffb060;border:1px solid #6a4a2a"></div> Straggler</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#60ffa0;border:1px solid #2a6a4a"></div> Main chain</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ffe060;border:1px solid #6a6a2a"></div> Just inserted</div>
+</div>
+
+<div class="controls">
+  <input type="text" id="input" value="9 3 7 1 5" placeholder="e.g. 9 3 7 1 5">
+  <button class="btn-run" onclick="runViz()">▶ Visualize</button>
+  <button class="btn-prev" id="prevBtn" onclick="move(-1)" disabled>← Prev</button>
+  <div class="step-counter" id="stepCounter"></div>
+  <button class="btn-next" id="nextBtn" onclick="move(1)" disabled>Next →</button>
+</div>
+
+<div id="output"></div>
+
+<script>
+let steps = [];
+let currentStep = 0;
+
+function numEl(val, cls) {
+  return `<div class="num ${cls}">${val}</div>`;
+}
+
+function collectSteps(arr) {
+  steps = [];
+
+  function fj(arr, depth) {
+    if (arr.length <= 1) {
+      steps.push({
+        depth,
+        type: 'base',
+        arr: [...arr],
+        desc: `Base case reached at depth ${depth}: array has ${arr.length} element — nothing to sort, return immediately.`
+      });
+      return [...arr];
+    }
+
+    let straggler = null;
+    if (arr.length % 2 !== 0) {
+      straggler = arr[arr.length - 1];
+      steps.push({
+        depth,
+        type: 'straggler',
+        arr: [...arr],
+        straggler,
+        desc: `Array has <strong>${arr.length} elements</strong> (odd). Last element <strong>${straggler}</strong> becomes the <strong>straggler (b${Math.floor(arr.length/2)+1})</strong>. It sits out the entire recursion and gets inserted at the very end.`
+      });
+    }
+
+    // build pairs
+    let pairs = [];
+    for (let i = 0; i + 1 < arr.length; i += 2) {
+      let a = arr[i], b = arr[i+1];
+      if (a >= b) pairs.push([a, b]);
+      else pairs.push([b, a]);
+    }
+
+    steps.push({
+      depth,
+      type: 'pairs',
+      arr: [...arr],
+      pairs: pairs.map(p => [...p]),
+      straggler,
+      desc: `Pair up elements. Always put the <strong>larger as A</strong> (top) and <strong>smaller as B</strong> (bottom). ${straggler !== null ? `Straggler <strong>${straggler}</strong> is ignored.` : ''}`
+    });
+
+    let biggerNumbers = pairs.map(p => p[0]);
+
+    steps.push({
+      depth,
+      type: 'recurse',
+      biggerNumbers: [...biggerNumbers],
+      depth,
+      desc: `Extract all <strong>A numbers</strong> [${biggerNumbers.join(', ')}] and recurse on them. The B numbers and straggler wait here.`
+    });
+
+    let sortedBiggers = fj(biggerNumbers, depth + 1);
+
+    steps.push({
+      depth,
+      type: 'back',
+      sortedBiggers: [...sortedBiggers],
+      pairs: pairs.map(p => [...p]),
+      straggler,
+      desc: `Back at depth ${depth}. A numbers are now sorted: <strong>[${sortedBiggers.join(', ')}]</strong>. Now build the main chain and insert B numbers.`
+    });
+
+    // reorder pairs to match sorted biggers
+    let usedIdx = new Array(pairs.length).fill(false);
+    let sortedPairs = [];
+    for (let i = 0; i < sortedBiggers.length; i++) {
+      for (let j = 0; j < pairs.length; j++) {
+        if (!usedIdx[j] && pairs[j][0] === sortedBiggers[i]) {
+          sortedPairs.push(pairs[j]);
+          usedIdx[j] = true;
+          break;
+        }
+      }
+    }
+
+    let mainChain = [sortedPairs[0][1], ...sortedPairs.map(p => p[0])];
+
+    steps.push({
+      depth,
+      type: 'mainchain',
+      mainChain: [...mainChain],
+      pairs: sortedPairs.map(p => [...p]),
+      straggler,
+      desc: `Build main chain: start with <strong>b1=${sortedPairs[0][1]}</strong> (it's guaranteed smaller than a1), then all A numbers. Chain = <strong>[${mainChain.join(', ')}]</strong>`
+    });
+
+    // insert pending b numbers
+    let pending = sortedPairs.slice(1).map(p => p[1]);
+    for (let i = 0; i < pending.size; i++) {
+    }
+
+    // insert each pending
+    for (let i = 0; i < pending.length; i++) {
+      let val = pending[i];
+      let pos = mainChain.findIndex(x => x > val);
+      if (pos === -1) pos = mainChain.length;
+      mainChain.splice(pos, 0, val);
+      steps.push({
+        depth,
+        type: 'insert',
+        mainChain: [...mainChain],
+        inserted: val,
+        label: `b${i+2}`,
+        straggler,
+        desc: `Binary search insert <strong>b${i+2}=${val}</strong> into main chain → <strong>[${mainChain.join(', ')}]</strong>`
+      });
+    }
+
+    if (straggler !== null) {
+      let pos = mainChain.findIndex(x => x > straggler);
+      if (pos === -1) pos = mainChain.length;
+      mainChain.splice(pos, 0, straggler);
+      steps.push({
+        depth,
+        type: 'insert',
+        mainChain: [...mainChain],
+        inserted: straggler,
+        label: `straggler`,
+        straggler: null,
+        desc: `Binary search insert <strong>straggler=${straggler}</strong> (no partner, search full chain) → <strong>[${mainChain.join(', ')}]</strong>`
+      });
+    }
+
+    return mainChain;
+  }
+
+  let input = document.getElementById('input').value.trim().split(/\s+/).map(Number).filter(n => !isNaN(n));
+  steps.push({
+    depth: 0,
+    type: 'start',
+    arr: [...input],
+    desc: `Starting Ford-Johnson sort on <strong>[${input.join(', ')}]</strong>. We will pair elements, sort the larger ones recursively, then binary search insert the smaller ones.`
+  });
+
+  fj(input, 0);
+
+  steps.push({
+    depth: 0,
+    type: 'done',
+    desc: `✅ Sort complete!`
+  });
+}
+
+function renderStep(s) {
+  let html = '';
+
+  let depthStr = s.depth > 0 ? `${'  '.repeat(s.depth)}depth ${s.depth}` : 'depth 0 (top level)';
+
+  html += `<div class="stage">`;
+  html += `<div class="recursion-depth">${depthStr}</div>`;
+  html += `<div class="stage-label">${s.type.toUpperCase()}</div>`;
+  html += `<div class="desc">${s.desc}</div>`;
+
+  if (s.type === 'start' || s.type === 'base') {
+    html += `<div class="arr-row">`;
+    html += `<div class="arr-label">array:</div>`;
+    (s.arr || []).forEach(n => { html += numEl(n, 'num-default'); });
+    html += `</div>`;
+  }
+
+  if (s.type === 'straggler') {
+    html += `<div class="arr-row">`;
+    html += `<div class="arr-label">array:</div>`;
+    s.arr.forEach((n, i) => {
+      let cls = (n === s.straggler && i === s.arr.length - 1) ? 'num-strag' : 'num-default';
+      html += numEl(n, cls);
+    });
+    html += `</div>`;
+  }
+
+  if (s.type === 'pairs') {
+    html += `<div class="arr-row" style="margin-top:10px">`;
+    html += `<div class="arr-label">pairs:</div>`;
+    s.pairs.forEach((p, i) => {
+      html += `<div class="pair-group">`;
+      html += `<div class="pair-bracket">a${i+1}</div>`;
+      html += `<div class="pair-nums">${numEl(p[0], 'num-a')}</div>`;
+      html += `<div class="pair-bracket">b${i+1}</div>`;
+      html += `<div class="pair-nums">${numEl(p[1], 'num-b')}</div>`;
+      html += `</div>`;
+    });
+    if (s.straggler !== null) {
+      html += `<div class="pair-group">`;
+      html += `<div class="pair-bracket">—</div>`;
+      html += `<div class="pair-nums">${numEl(s.straggler, 'num-strag')}</div>`;
+      html += `<div class="pair-bracket">strag</div>`;
+      html += `</div>`;
+    }
+    html += `</div>`;
+  }
+
+  if (s.type === 'recurse') {
+    html += `<div class="arr-row">`;
+    html += `<div class="arr-label">A numbers →</div>`;
+    s.biggerNumbers.forEach(n => { html += numEl(n, 'num-a'); });
+    html += `</div>`;
+  }
+
+  if (s.type === 'back') {
+    html += `<div class="arr-row">`;
+    html += `<div class="arr-label">sorted A:</div>`;
+    s.sortedBiggers.forEach(n => { html += numEl(n, 'num-a'); });
+    html += `</div>`;
+    html += `<div class="arr-row" style="margin-top:8px">`;
+    html += `<div class="arr-label">B numbers:</div>`;
+    s.pairs.forEach((p, i) => { html += numEl(p[1], 'num-b'); });
+    if (s.straggler !== null) html += numEl(s.straggler, 'num-strag');
+    html += `</div>`;
+  }
+
+  if (s.type === 'mainchain') {
+    html += `<div class="arr-row">`;
+    html += `<div class="arr-label">main chain:</div>`;
+    s.mainChain.forEach(n => { html += numEl(n, 'num-chain'); });
+    html += `</div>`;
+    if (s.straggler !== null) {
+      html += `<div class="arr-row" style="margin-top:8px">`;
+      html += `<div class="arr-label">straggler:</div>`;
+      html += numEl(s.straggler, 'num-strag');
+      html += `</div>`;
+    }
+  }
+
+  if (s.type === 'insert') {
+    html += `<div class="arr-row">`;
+    html += `<div class="arr-label">chain now:</div>`;
+    s.mainChain.forEach(n => {
+      let cls = (n === s.inserted) ? 'num-inserted' : 'num-chain';
+      html += numEl(n, cls);
+    });
+    html += `</div>`;
+    if (s.straggler !== null) {
+      html += `<div class="arr-row" style="margin-top:8px">`;
+      html += `<div class="arr-label">straggler:</div>`;
+      html += numEl(s.straggler, 'num-strag');
+      html += `</div>`;
+    }
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+function runViz() {
+  collectSteps();
+  currentStep = 0;
+  render();
+}
+
+function render() {
+  document.getElementById('output').innerHTML = renderStep(steps[currentStep]);
+  document.getElementById('stepCounter').textContent = `${currentStep + 1} / ${steps.length}`;
+  document.getElementById('prevBtn').disabled = currentStep === 0;
+  document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+}
+
+function move(dir) {
+  currentStep = Math.max(0, Math.min(steps.length - 1, currentStep + dir));
+  render();
+}
+
+// run on load with default
+runViz();
+</script>
+</body>
+</html>
