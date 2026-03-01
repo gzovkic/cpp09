@@ -58,9 +58,15 @@ void fordJohnson(std::vector<int> &arr)
     if (arr.size() <= 1)
         return;
 
+
+        
     bool hasStraggler = false;
     if(arr.size() % 2 != 0)
         hasStraggler = true;
+
+    int straggler = -1;
+    if (hasStraggler)
+        straggler = arr.back();
 
     std::vector<std::pair<int, int>> pairs;
     size_t limit = arr.size();
@@ -89,9 +95,14 @@ void fordJohnson(std::vector<int> &arr)
     std::cout << "--- coming back up ---" << std::endl;
     std::cout << "bigs sorted: "; printVector(bigs);
 
-    std::sort(pairs.begin(), pairs.end(), [](const std::pair<int,int> &a, const std::pair<int,int> &b){
-        return a.first < b.first;
-    });
+
+    std::map<int, int> bigToSmall;
+    for (const std::pair<int, int> &p : pairs)
+        bigToSmall[p.first] = p.second;
+
+    pairs.clear();
+    for (int big : bigs)
+        pairs.push_back({big, bigToSmall[big]});
     std::cout << "pairs realigned: "; printPairs(pairs);
 
     std::vector<int> chain;
@@ -111,6 +122,11 @@ void fordJohnson(std::vector<int> &arr)
         std::cout << "inserted " << toInsert << " (bound=" << boundVal << ") -> chain: "; printVector(chain);
     }
 
+    if (hasStraggler)
+    {
+        auto pos = std::lower_bound(chain.begin(), chain.end(), straggler);
+        chain.insert(pos, straggler);
+    }
     arr = chain;
     std::cout << "arr = chain: "; printVector(arr);
     std::cout << std::endl;
